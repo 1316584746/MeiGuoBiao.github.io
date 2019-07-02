@@ -1,0 +1,173 @@
+package org.hdfs.test;
+
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.zookeeper.Op.Create;
+
+import io.netty.handler.codec.http.HttpContentEncoder.Result;
+
+/**
+ * @author mgb
+ *
+ */
+public class HdfsTest {
+    public static void main(String[] args) {
+//		//1.获取访问入口：FileSystem;
+//    	FileSystem FS=getHadoopFileSystem();
+//    	System.out.println(FS);
+    	
+//    	//创建目录
+//    	boolean result=creatPath("/text");
+//    	System.out.println(result);
+    	
+//    	//创建文件
+//    	boolean result =createFile("/test/test.txt","你好！智障！！");
+//    	System.out.println(result);
+    	
+//    	//上传文件
+//    	//输出pathName可以是目录也可以时文件
+    	//putFile2HDFS("/home/mgb/桌面/word.txt", "/test/word1.txt");
+	
+    
+    }
+    /**
+     * 生成文件系统FileSystem 
+     * @return
+     */
+    public static FileSystem getHadoopFileSystem() {
+	   Configuration conf=new Configuration();
+	  conf.set("fs.defaultFS", "hdfs://localhost:9000");
+	   //执行namenode的地址;
+    	try {
+    		//调用FileSystem工厂模式get方法生成fileSystem
+			FileSystem FS=	FileSystem.get(conf);
+			return FS;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return null;
+		
+	}
+    //创建目录的方法
+    public static boolean creatPath(String pathName) {
+	 boolean result= false;
+    	//1.获取文件系统
+    	FileSystem FS=getHadoopFileSystem();
+   //2.调用文件系统的mkdir创建目录 	
+    	Path path = new Path(pathName);
+    	try {
+			FS.mkdirs(path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			 //3.将文件系统关闭
+				close(FS);
+		}
+  
+    	
+    	return result;
+	}
+    
+   /**
+    *创建文件
+    * @param pathName
+    * @param content
+    * @return
+    */
+     public static  boolean  createFile(String pathName,String content) {
+	boolean   result=false;
+    //1.获取文件系统
+	FileSystem FS=getHadoopFileSystem();
+	//2.调用文件系统create方法创建文件
+	try {
+		//2.1创建文件
+		FSDataOutputStream out=FS.create(new Path(pathName));
+		//2.2写入数据
+		out.writeUTF(content);
+		result=true;
+	} catch (IllegalArgumentException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}finally {
+		close(FS);
+	}
+	//3.关闭文件系统
+	return result;
+	
+	
+	}
+     
+     //上传文件
+     public static void putFile2HDFS(String srcPathName,String dstPathName) {
+    	//1.获取文件系统
+    		FileSystem FS=getHadoopFileSystem();
+        //2.调用文件系统中的copyFromLocalFile上传文件
+    		try {
+				FS.copyFromLocalFile(new Path(srcPathName), new Path(dstPathName));
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	//3.关闭文件系统
+    		close(FS);
+	}
+     
+     
+     
+    /**
+     *关闭文件系统的方法
+     * @param FS
+     */
+     public static void close(FileSystem FS) {
+    	 try {
+				FS.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
+     
+}
+
+
+
+
+pom文件
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.mgb.hadoop</groupId>
+	<artifactId>hadoop-test</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>hadoop-test</name>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-client -->
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-client</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+	</dependencies>
+  
+</project>
+
+
+
+
